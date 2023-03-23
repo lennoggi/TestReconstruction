@@ -40,16 +40,16 @@ EXE = TestReconstruction_exe
 
 # Build all targets
 build: ${OBJ}
-	${CXX} -o ${EXE} ${OBJ} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} ${LDFLAGS}
+	${CXX} -o ${EXE} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} ${LDFLAGS} ${OBJ}
 
 Main.o: Main.cc Parameters.hh Declarations.hh
-	${CXX} -c Main.cc ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} ${LDFLAGS}
+	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c Main.cc
 
 TestFunctions.o: TestFunctions.cc Parameters.hh Declarations.hh
-	${CXX} -c TestFunctions.cc ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} ${LDFLAGS}
+	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c TestFunctions.cc
 
 PPM.o: PPM.cc Parameters.hh Declarations.hh Helpers.hh
-	${CXX} -c PPM.cc ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} ${LDFLAGS}
+	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c PPM.cc
 
 .PHONY : clean
 clean:

@@ -3,7 +3,10 @@
  * https://crd.lbl.gov/assets/pubs_presos/AMCS/ANAG/A141984.pdf)
  ******************************************************************** */
 
+#include <iostream>
+#include <iomanip>
 #include <cmath>
+
 #include "Parameters.hh"
 #include "Declarations.hh"
 #include "Helpers.hh"
@@ -56,6 +59,14 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
     double rc_low = a_Im_I;
     double rc_up  = a_I_Ip;
 
+    # if (VERBOSE)
+    cout << endl
+         << "PPM step 1" << endl
+         << "----------" << endl
+         << "rc_low = " << setprecision(16) << rc_low << endl
+         << "rc_up  = " << setprecision(16) << rc_up  << endl;
+    #endif
+
 
     // Build the pressure from a polytropic EOS
     const double press_Immm = PPM_POLY_K*pow(a_Immm, PPM_POLY_GAMMA);
@@ -74,7 +85,7 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
      * This is only applied to rho and only if the shock is marked as a contact
      * discontinuity (see eq. 3.2)                                                */
     // FIXME: contact discontinuity check only valid for polytropic/ideal-fluid EOS
-    #if (SHOCK_DETECTION)
+    #if (PPM_SHOCK_DETECTION)
     const bool contact_disc = (PPM_POLY_K*PPM_POLY_GAMMA*fabs(diff_I)*min_press_I >=
                                fabs(diff_press_I)*min(a_Ip, a_Im));
     if (contact_disc) {
@@ -87,10 +98,20 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
       rc_low = (1. - eta_I)*rc_low + eta_I*(a_Im + 0.5*deltamod_Im);
       rc_up  = (1. - eta_I)*rc_up  + eta_I*(a_Ip - 0.5*deltamod_Ip);
     }
+
+    # if (VERBOSE)
+    cout << endl
+         << "PPM step 2 (shock detection)" << endl
+         << "----------------------------" << endl
+         << "rc_low = " << setprecision(16) << rc_low << endl
+         << "rc_up  = " << setprecision(16) << rc_up  << endl;
+    #endif
+
     #endif
 
 
     // Zone flattening to reduce post-shock oscillations (see eq. 4.1 + appendix)
+    #if (PPM_ZONE_FLATTENING)
     const double w_I      = (diff_press_I  > PPM_EPS*min_press_I and
                              vel_Im > vel_Ip) ? 1. : 0.;
     const double ftilde_I = 1. - max(0., w_I*PPM_OMEGA2*(diff_press_I/(press_Ipp - press_Imm) - PPM_OMEGA1));
@@ -119,8 +140,19 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
         rc_up  = fI_gfI + one_minus_fI*rc_up;
     }
 
+    # if (VERBOSE)
+    cout << endl
+         << "PPM step 3 (zone flattening)" << endl
+         << "----------------------------" << endl
+         << "rc_low = " << setprecision(16) << rc_low << endl
+         << "rc_up  = " << setprecision(16) << rc_up  << endl;
+    #endif
+
+    #endif
+
 
     // Monotonization (see eq. 1.10)
+    #if (PPM_MONOTONIZATION)
     if ((rc_up - a_I)*(a_I - rc_low) <= 0) {
         rc_low = a_I;
         rc_up  = a_I;
@@ -139,6 +171,17 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
             rc_up = 3.*a_I - 2.*rc_low;
         }
     }
+
+    # if (VERBOSE)
+    cout << endl
+         << "PPM step 4 (monotonization)" << endl
+         << "---------------------------" << endl
+         << "rc_low = " << setprecision(16) << rc_low << endl
+         << "rc_up  = " << setprecision(16) << rc_up  << endl
+         << endl;
+    #endif
+
+    #endif
 
 
     // Return the lower and upper reconstructed states in cell I
