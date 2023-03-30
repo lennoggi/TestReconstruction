@@ -16,32 +16,27 @@ static_assert(0);
 
 
 #elif (RC == 1)
-#define PPM_SHOCK_DETECTION true
-#define PPM_ZONE_FLATTENING true
+#define PPM_SHOCK_DETECTION false
+#define PPM_ZONE_FLATTENING false
 #define PPM_MONOTONIZATION  true
 static_assert(PPM_SHOCK_DETECTION or not PPM_SHOCK_DETECTION);
 static_assert(PPM_ZONE_FLATTENING or not PPM_ZONE_FLATTENING);
 static_assert(PPM_MONOTONIZATION  or not PPM_MONOTONIZATION);
 
-#if (PPM_SHOCK_DETECTION)
 #define PPM_POLY_K          0.01
 #define PPM_POLY_GAMMA      (5./3.)
 #define PPM_ETA1            20.
 #define PPM_ETA2            0.05
+#define PPM_EPS             0.33
+#define PPM_OMEGA1          0.75
+#define PPM_OMEGA2          10.
 static_assert(PPM_POLY_K     > 0.);
 static_assert(PPM_POLY_GAMMA > 0.);
 static_assert(PPM_ETA1       > 0.);
 static_assert(PPM_ETA2       > 0.);
-#endif
-
-#if (PPM_ZONE_FLATTENING)
-#define PPM_EPS             0.33
-#define PPM_OMEGA1          0.75
-#define PPM_OMEGA2          10.
 static_assert(PPM_EPS    > 0.);
 static_assert(PPM_OMEGA1 > 0.);
 static_assert(PPM_OMEGA2 > 0.);
-#endif
 
 /* PPM velocity profile:
  *   - 0 for constant (equal to 0)
@@ -67,7 +62,7 @@ constexpr inline int ncells = 7;
  *   - 2 for second-order polynomial
  *   - TODO: others
  */
-#define TEST_FUNCTION 1
+#define TEST_FUNCTION 2
 static_assert(TEST_FUNCTION == 1 or TEST_FUNCTION == 2);
 
 #if (TEST_FUNCTION == 1)

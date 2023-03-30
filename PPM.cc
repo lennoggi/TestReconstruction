@@ -46,15 +46,19 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
     const double _2fabs_Ip_I   = 2.*fabs(a_Ip  - a_I);
     const double _2fabs_Ipp_Ip = 2.*fabs(a_Ipp - a_Ip);
 
-    const double deltamod_Im = sgn(delta_Im)*min(fabs(delta_Im), min(_2fabs_Im_Imm, _2fabs_I_Im));
-    const double deltamod_I  = sgn(delta_I) *min(fabs(delta_I),  min(_2fabs_I_Im,   _2fabs_Ip_I));
-    const double deltamod_Ip = sgn(delta_Ip)*min(fabs(delta_Ip), min(_2fabs_Ip_I,   _2fabs_Ipp_Ip));
+    const bool same_sgn_Im = ((a_I   - a_Im) * (a_Im - a_Imm) > 0.);
+    const bool same_sgn_I  = ((a_Ip  - a_I)  * (a_I  - a_Im)  > 0.);
+    const bool same_sgn_Ip = ((a_Ipp - a_Ip) * (a_Ip - a_I)   > 0.);
+
+    const double deltamod_Im = same_sgn_Im ? sgn(delta_Im)*min(fabs(delta_Im), min(_2fabs_Im_Imm, _2fabs_I_Im))   : 0.;
+    const double deltamod_I  = same_sgn_I  ? sgn(delta_I) *min(fabs(delta_I),  min(_2fabs_I_Im,   _2fabs_Ip_I))   : 0.;
+    const double deltamod_Ip = same_sgn_Ip ? sgn(delta_Ip)*min(fabs(delta_Ip), min(_2fabs_Ip_I,   _2fabs_Ipp_Ip)) : 0.;
 
 
     /* Initial reconstructed states at the interfaces between cells Im/I and I/Ip
      * NOTE: not const because they may change later                            */
-    const double a_Im_I = 0.5*(a_Im + a_I)  + (1./6.)*(deltamod_I  - deltamod_Im);
-    const double a_I_Ip = 0.5*(a_I  + a_Ip) + (1./6.)*(deltamod_Ip - deltamod_I);
+    const double a_Im_I = 0.5*(a_Im + a_I)  + (1./6.)*(deltamod_Im - deltamod_I);
+    const double a_I_Ip = 0.5*(a_I  + a_Ip) + (1./6.)*(deltamod_I  - deltamod_Ip);
 
     double rc_low = a_Im_I;
     double rc_up  = a_I_Ip;
@@ -89,10 +93,10 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
     const bool contact_disc = (PPM_POLY_K*PPM_POLY_GAMMA*fabs(diff_I)*min_press_I >=
                                fabs(diff_press_I)*min(a_Ip, a_Im));
     if (contact_disc) {
-      const double d2a_Im      = a_I   - 2*a_Im + a_Imm;
-      const double d2a_Ip      = a_Ipp - 2*a_Ip + a_I;
+      const double d2a_Im      = a_I   - 2.*a_Im + a_Imm;
+      const double d2a_Ip      = a_Ipp - 2.*a_Ip + a_I;
       const double d2_prod     = d2a_Im*d2a_Ip;
-      const double eta_tilde_I = (d2_prod < 0) ? (-1./6.)*d2_prod/diff_I : 0;
+      const double eta_tilde_I = (d2_prod < 0.) ? (-1./6.)*d2_prod/diff_I : 0.;
       const double eta_I       = max(0., min(PPM_ETA1*(eta_tilde_I - PPM_ETA2), 1.));
 
       rc_low = (1. - eta_I)*rc_low + eta_I*(a_Im + 0.5*deltamod_Im);
@@ -153,7 +157,7 @@ array<double, 2> ppm(const array<double, 7> &cell_avgs,
 
     // Monotonization (see eq. 1.10)
     #if (PPM_MONOTONIZATION)
-    if ((rc_up - a_I)*(a_I - rc_low) <= 0) {
+    if ((rc_up - a_I)*(a_I - rc_low) <= 0.) {
         rc_low = a_I;
         rc_up  = a_I;
     }
