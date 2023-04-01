@@ -34,7 +34,7 @@ endif
 
 
 # Objects to be built
-OBJ = Main.o TestFunctions.o PPM.o
+OBJ = Main.o TestFunctions.o Minmod.o PPM.o
 EXE = TestReconstruction_exe
 
 
@@ -47,6 +47,9 @@ Main.o: Main.cc Parameters.hh Declarations.hh
 
 TestFunctions.o: TestFunctions.cc Parameters.hh Declarations.hh
 	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c TestFunctions.cc
+
+Minmod.o: Minmod.cc Declarations.hh
+	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c Minmod.cc
 
 PPM.o: PPM.cc Parameters.hh Declarations.hh Helpers.hh
 	${CXX} ${CXXFLAGS} ${CXX_OPTIMIZE_FLAGS} ${CXX_WARN_FLAGS} ${CXX_DEBUG_FLAGS} -c PPM.cc

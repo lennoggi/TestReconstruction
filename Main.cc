@@ -1,7 +1,3 @@
-/* *************
- * Main function
- * ************* */
-
 #include <iostream>
 #include <iomanip>
 #include <array>
@@ -13,7 +9,7 @@ using namespace std;
 
 
 int main() {
-    /* The number of cells must be odd (one central cells having the same number
+    /* The number of cells must be odd (one central cell having the same number
      * of neighbors on each side)                                               */
     static_assert(ncells & 1);
 
@@ -23,6 +19,10 @@ int main() {
     const int ncells_half = ncells/2;
     array<double, ncells> cell_avgs;
 
+
+    /* ------------------------ *
+     * Set up the test function *
+     * ------------------------ */
     #if (TEST_FUNCTION == 1)
     const string test_function = "Order-1 polynomial";
 
@@ -51,29 +51,36 @@ int main() {
     #endif
 
 
-    // Reconstruct
-    #if (RC == 0)  // Minmod
-    // TODO
-    static_assert(0);  // FIXME: remove when minmod is implemented
 
-    #elif (RC == 1)  // PPM
+    /* ----------- *
+     * Reconstruct *
+     * ----------- */
+    // Minmod
+    #if (RC == 1)
+    static_assert(ncells == 3);
+    const string rc_method    = "Minmod";
+    const array<double, 2> rc = minmod_rc(cell_avgs);
+
+
+    // PPM
+    #elif (RC == 2)
     static_assert(ncells == 7);
     const string rc_method = "PPM";
     array<double, 5> vel_avgs;
 
-    #if (VELOCITY_PROFILE == 0)  // Zero velocity
+    #if (VELOCITY_PROFILE == 1)  // Zero velocity
     for (int i = 0; i < 5; ++i) {
         vel_avgs.at(i) = 0.;
     }
 
-    #elif (VELOCITY_PROFILE == 1)  // (Linearly) increasing
+    #elif (VELOCITY_PROFILE == 2)  // (Linearly) increasing
     const double one_over_2dx = 0.5/DX;
     for (int i = 0; i < 5; ++i) {
         const int index = i - 2;
         vel_avgs.at(i)  = one_over_2dx*index;  // vel_avgs lies in [-1, 1]
     }
 
-    #elif (VELOCITY_PROFILE == 2)  // (Linearly) decreasing
+    #elif (VELOCITY_PROFILE == 3)  // (Linearly) decreasing
     const double one_over_2dx = 0.5/DX;
     for (int i = 0; i < 5; ++i) {
         const int index = i - 2;
@@ -84,7 +91,7 @@ int main() {
     static_assert(0);  // This should have been caught already
     #endif  // VELOCITY_PROFILE
 
-    const array<double, 2> rc = ppm(cell_avgs, vel_avgs);
+    const array<double, 2> rc = ppm_rc(cell_avgs, vel_avgs);
 
 
     #else
@@ -93,7 +100,9 @@ int main() {
 
 
 
-    // Compare the reconstructed result to the true result at both interfaces
+    /* ---------------------------------------------------------------------- * 
+     * Compare the reconstructed result to the true result at both interfaces *
+     * ---------------------------------------------------------------------- */
     cout << endl
          << "Setup" << endl
          << "-----" << endl

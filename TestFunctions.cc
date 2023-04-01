@@ -1,7 +1,3 @@
-/* **************************************
- * Some test functions for reconstruction
- * ************************************** */
-
 // Linear function
 double poly1(const double &a,
              const double &b,

@@ -14,8 +14,8 @@
 using namespace std;
 
 
-array<double, 2> ppm(const array<double, 7> &cell_avgs,
-                     const array<double, 5> &vel_avgs) {
+array<double, 2> ppm_rc(const array<double, 7> &cell_avgs,
+                        const array<double, 5> &vel_avgs) {
     // Unpack all cell averages
     const double a_Immm = cell_avgs.at(0);
     const double a_Imm  = cell_avgs.at(1);
